@@ -6,40 +6,53 @@ namespace NodeNet
 {
 	public class Node
 	{
-		public Action<Node, byte> OutputListener;
+		public Action<Node, int> OutputListener;
 
-		private byte _value;
-		private Dictionary<byte, byte> _ioMap = new Dictionary<byte, byte>();
-		private Dictionary<Node, byte> _inputs = new Dictionary<Node, byte>();
+		public int Value { get; set; }
+		private Dictionary<int, int> _ioMap = new Dictionary<int, int>();
+		private Dictionary<Node, int> _inputs = new Dictionary<Node, int>();
 
-		void AddInput(Node node)
+		public void AddInput(Node node)
 		{
 			if (!_inputs.ContainsKey(node))
 				_inputs.Add(node, 0);
 			node.OutputListener += InputChanged;
 		}
 
-		void InputChanged(Node inputNode, byte val)
+		void InputChanged(Node inputNode, int val)
 		{
 			if (_inputs.ContainsKey(inputNode))
 				_inputs[inputNode] = val;
 		}
 
-		void Update()
+		public void Eval()
 		{
 			//calc new lookup value based on inputs
 			//	AND together all inputs to get lookup key
+			int result = 0;
+			foreach (var n in _inputs)
+			{
+				result &= n.Value;
+			}
 			//  get value for key in ioMap
-			//	set value to 0 if not found
-
+			if (_ioMap.ContainsKey(result))
+				Value = _ioMap[result];
+			else //	set value to 0 if not found
+				Value = 0;
 			//notify upstream listener
-			OutputListener?.Invoke(this, _value);
+			OutputListener?.Invoke(this, Value);
 		}
 
-		void Learn(byte val)
+		public void Learn(int val)
 		{
 			//calc key based on current inputs
+			int result = 0;
+			foreach (var n in _inputs)
+			{
+				result &= n.Value;
+			}
 			//set ioMap value for key to val
+			_ioMap[result] = val;
 		}
 	}
 }
