@@ -7,18 +7,18 @@ namespace NodeNet
 	public class Node
 	{
 		//public Action<Node, int> OutputListener;
-        private int _value;
-        public int Value
-	    {
-	        get { return _value; }
-	        set { _value = value; }
-	    }
+		private int _value;
+		public int Value
+		{
+			get { return _value; }
+			set { _value = value; }
+		}
 
-	    private Dictionary<int, int> _ioMap = new Dictionary<int, int>();
+		private Dictionary<int, int> _ioMap = new Dictionary<int, int>();
 		private List<Node> _inputs = new List<Node>();
-	    
+		
 
-	    public void AddInput(Node node)
+		public void AddInput(Node node)
 		{
 			_inputs.Add(node);
 			//node.OutputListener += InputChanged;
@@ -32,14 +32,14 @@ namespace NodeNet
 
 		public void Eval()
 		{
-            //calc new lookup value based on inputs
-            int key = _inputs.Count;
-            for (int i = 0; i < _inputs.Count; i++)
-            {
-                key = unchecked(key * 32 + _inputs[i].Value);
-            }
-            //  get value for key in ioMap
-            if (_ioMap.ContainsKey(key))
+			//calc new lookup value based on inputs
+			int key = _inputs.Count;
+			for (int i = 0; i < _inputs.Count; i++)
+			{
+				key = unchecked(key * 32 + _inputs[i].Value);
+			}
+			//  get value for key in ioMap
+			if (_ioMap.ContainsKey(key))
 				Value = _ioMap[key];
 			else //	set value to 0 if not found
 				Value = 0;
