@@ -6,53 +6,57 @@ namespace NodeNet
 {
 	public class Node
 	{
-		public Action<Node, int> OutputListener;
+		//public Action<Node, int> OutputListener;
+        private int _value;
+        public int Value
+	    {
+	        get { return _value; }
+	        set { _value = value; }
+	    }
 
-		public int Value { get; set; }
-		private Dictionary<int, int> _ioMap = new Dictionary<int, int>();
-		private Dictionary<Node, int> _inputs = new Dictionary<Node, int>();
+	    private Dictionary<int, int> _ioMap = new Dictionary<int, int>();
+		private List<Node> _inputs = new List<Node>();
+	    
 
-		public void AddInput(Node node)
+	    public void AddInput(Node node)
 		{
-			if (!_inputs.ContainsKey(node))
-				_inputs.Add(node, 0);
-			node.OutputListener += InputChanged;
+			_inputs.Add(node);
+			//node.OutputListener += InputChanged;
 		}
 
-		void InputChanged(Node inputNode, int val)
-		{
-			if (_inputs.ContainsKey(inputNode))
-				_inputs[inputNode] = val;
-		}
+		//void InputChanged(Node inputNode, int val)
+		//{
+		//	if (_inputs.ContainsKey(inputNode))
+		//		_inputs[inputNode] = val;
+		//}
 
 		public void Eval()
 		{
-			//calc new lookup value based on inputs
-			//	AND together all inputs to get lookup key
-			int result = 0;
-			foreach (var n in _inputs)
-			{
-				result &= n.Value;
-			}
-			//  get value for key in ioMap
-			if (_ioMap.ContainsKey(result))
-				Value = _ioMap[result];
+            //calc new lookup value based on inputs
+            int key = _inputs.Count;
+            for (int i = 0; i < _inputs.Count; i++)
+            {
+                key = unchecked(key * 32 + _inputs[i].Value);
+            }
+            //  get value for key in ioMap
+            if (_ioMap.ContainsKey(key))
+				Value = _ioMap[key];
 			else //	set value to 0 if not found
 				Value = 0;
 			//notify upstream listener
-			OutputListener?.Invoke(this, Value);
+			//OutputListener?.Invoke(this, Value);
 		}
 
 		public void Learn(int val)
 		{
 			//calc key based on current inputs
-			int result = 0;
-			foreach (var n in _inputs)
+			int key = _inputs.Count;
+			for (int i = 0; i<_inputs.Count; i++)
 			{
-				result &= n.Value;
+				key = unchecked(key * 32 + _inputs[i].Value);
 			}
 			//set ioMap value for key to val
-			_ioMap[result] = val;
+			_ioMap[key] = val;
 		}
 	}
 }
