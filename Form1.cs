@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace NodeNet
 {
 	public partial class Form1 : Form
 	{
-        private Node node_in_1;
-        private Node node_in_2;
-        private Node node_out;
+        private readonly List<Node> _inputNodes = new List<Node>();
+        private Node _nodeOut;
+
 		public Form1()
 		{
 			InitializeComponent();
@@ -20,39 +21,31 @@ namespace NodeNet
 
 		private void CreateNet()
 		{
-            //add input nodes
-            node_in_1 = new Node();
-            node_in_2 = new Node();
+            //create input nodes
+            _inputNodes.Add(new Node());
+            _inputNodes.Add(new Node());
 
             //add output node
-            node_out = new Node();
+            _nodeOut = new Node(_inputNodes);
 
-			//connect nodes
-			node_out.AddInput(node_in_1);
-            node_out.AddInput(node_in_2);
         }
 
 		private void btnLearn_Click(object sender, EventArgs e)
 		{
-            //set input values
-            node_in_1.Value = int.Parse(txtInput1.Text);
-            node_in_2.Value = int.Parse(txtInput2.Text);
 
-            //teach output node the correct result
-            node_out.Learn(int.Parse(txtOutput.Text));
 		}
 
 		private void btnEval_Click(object sender, EventArgs e)
 		{
 
             //set input value
-            node_in_1.Value = int.Parse(txtInput1.Text);
-            node_in_2.Value = int.Parse(txtInput2.Text);
+            _inputNodes[0].Value = double.Parse(txtInput1.Text);
+            _inputNodes[1].Value = double.Parse(txtInput2.Text);
 
             //eval for result
-            node_out.Eval();
+            _nodeOut.CalcValue();
 
-		    txtOutput.Text = node_out.Value.ToString();
+		    txtOutput.Text = _nodeOut.Value.ToString();
 		}
 	}
 }

@@ -4,59 +4,55 @@ using System.Collections.Generic;
 
 namespace NodeNet
 {
-	public class Node
-	{
-		//public Action<Node, int> OutputListener;
-		private int _value;
-		public int Value
-		{
-			get { return _value; }
-			set { _value = value; }
-		}
+    public class Node
+    {
+        //public Action<Node, int> OutputListener;
+        private static readonly Random Random = new Random();
 
-		private Dictionary<int, int> _ioMap = new Dictionary<int, int>();
-		private List<Node> _inputs = new List<Node>();
-		
+        public double Value { get; set; }
 
-		public void AddInput(Node node)
-		{
-			_inputs.Add(node);
-			//node.OutputListener += InputChanged;
-		}
+        public List<Synapse> Synapses { get; set; }
 
-		//void InputChanged(Node inputNode, int val)
-		//{
-		//	if (_inputs.ContainsKey(inputNode))
-		//		_inputs[inputNode] = val;
-		//}
+        public Node()
+        {
+            Synapses = new List<Synapse>();
+        }
 
-		public void Eval()
-		{
-			//calc new lookup value based on inputs
-			int key = _inputs.Count;
-			for (int i = 0; i < _inputs.Count; i++)
-			{
-				key = unchecked(key * 32 + _inputs[i].Value);
-			}
-			//  get value for key in ioMap
-			if (_ioMap.ContainsKey(key))
-				Value = _ioMap[key];
-			else //	set value to 0 if not found
-				Value = 0;
-			//notify upstream listener
-			//OutputListener?.Invoke(this, Value);
-		}
+        public Node(IEnumerable<Node> inputNodes) : this()
 
-		public void Learn(int val)
-		{
-			//calc key based on current inputs
-			int key = _inputs.Count;
-			for (int i = 0; i<_inputs.Count; i++)
-			{
-				key = unchecked(key * 32 + _inputs[i].Value);
-			}
-			//set ioMap value for key to val
-			_ioMap[key] = val;
-		}
-	}
+        {
+            foreach (var node in inputNodes)
+            {
+                var synapse = new Synapse(node, this);
+                Synapses.Add(synapse);
+            }
+        }
+
+        public void CalcValue()
+        {
+            //calc new value based on inputs
+
+            //Value = Synapses.Sum(s => s.InputNode.Value / 2 + s.Value / 2) / Synapses.Count;
+            double v = 0.0;
+            foreach (var synapse in Synapses)
+            {
+                double w = synapse.InputNode.Value * synapse.Weight;
+                v += w;
+
+            }
+            Value = v / Synapses.Count;
+
+        }
+
+        public void Learn(int val)
+        {
+
+        }
+
+        public static double GetRandom()
+        {
+
+            return Random.NextDouble();
+        }
+    }
 }
